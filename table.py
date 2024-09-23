@@ -1,49 +1,52 @@
 import codecs
-import xlrd
-#from Modulos.modulos import *
+import chardet
+import fnmatch
+import os
+import pandas as pd
 from Cores import colores, borders
 
+os.remove('arquivo_utf8.csv')
+
+directory = 'D:/ADEMIR 2-22/PYTHON/EMKT'
+
+arquivo_csv = []
+
+for arquivo in os.listdir(directory):
+    if fnmatch.fnmatch(arquivo, '*.csv'):
+        arquivo_csv.append(arquivo)
 
 
-pasta = xlrd.open_workbook("rel_produto_pag_1.xls")
 
-sh = pasta.sheet_by_index(0)
+file_path = f'D:/ADEMIR 2-22/PYTHON/EMKT/{arquivo_csv[0]}'
+
+#print(file_path)
+
+with open(file_path, 'rb', ) as f:
+    result = chardet.detect(f.read())
+    original_encoding = result['encoding']
 
 
 
+df = pd.read_csv(arquivo_csv[0], encoding=original_encoding, sep=';')
+df.to_csv('arquivo_utf8.csv', index=False, encoding='utf-8')
 
-produto1 = [
-sh.cell_value(rowx=9, colx=1),
-float(sh.cell_value(rowx=9, colx=2)),
-float(sh.cell_value(rowx=9, colx=3)),
-sh.cell_value(rowx=9, colx=4),
-sh.cell_value(rowx=9, colx=5)
-]
+df_utf8 = pd.read_csv('arquivo_utf8.csv', encoding='utf-8',sep=',',index_col=False, usecols=['Nome produto', 'Imagem principal','Endereço do Produto (URL Tray)','Preço venda','Preço promoção'])
 
-produto2 = [
-sh.cell_value(rowx=10, colx=1),
-float(sh.cell_value(rowx=10, colx=2)),
-float(sh.cell_value(rowx=10, colx=3)),
-sh.cell_value(rowx=10, colx=4),
-sh.cell_value(rowx=10, colx=5)
-]
+# print(df_utf8)
 
-produto3 = [
-sh.cell_value(rowx=11, colx=1),
-float(sh.cell_value(rowx=11, colx=2)),
-float(sh.cell_value(rowx=11, colx=3)),
-sh.cell_value(rowx=11, colx=4),
-sh.cell_value(rowx=11, colx=5)
-]
+nome_produto = []
+img_produto = []
+preco_produto = []
+oferta_produto = []
+url_produto = []
 
-produto4 = [
-sh.cell_value(rowx=12, colx=1),
-float(sh.cell_value(rowx=12, colx=2)),
-float(sh.cell_value(rowx=12, colx=3)),
-sh.cell_value(rowx=12, colx=4),
-sh.cell_value(rowx=12, colx=5)
-]
 
+for k in df_utf8.values:
+    nome_produto.append(k[0])
+    img_produto.append(k[1])
+    preco_produto.append(k[2])
+    oferta_produto.append(k[3])
+    url_produto.append(k[4])
 
 
 
@@ -55,24 +58,24 @@ base_desconto = 10 #valor condicional para mostrar o selo de desconto
 
 
 for x in range(0,4): 
-    if produto1[3][11:15] == 'ruvo':
+    if url_produto[0][11:15] == '.ruv':
         desconto.append(x)
     else:
-        desconto.append(int(round(float((produto1[1]-produto1[2])/(produto1[1])*100))))
-        desconto.append(int(round(float((produto2[1]-produto2[2])/(produto2[1])*100))))
-        desconto.append(int(round(float((produto3[1]-produto3[2])/(produto3[1])*100))))
-        desconto.append(int(round(float((produto4[1]-produto4[2])/(produto4[1])*100))))
+        desconto.append(int(round(float((preco_produto[0]-oferta_produto[0])/(preco_produto[0])*100))))
+        desconto.append(int(round(float((preco_produto[1]-oferta_produto[1])/(preco_produto[1])*100))))
+        desconto.append(int(round(float((preco_produto[2]-oferta_produto[2])/(preco_produto[2])*100))))
+        desconto.append(int(round(float((preco_produto[3]-oferta_produto[3])/(preco_produto[3])*100))))
 
 
 # Variáveis para converter ponto em vírgula
-p1_p = f'{produto1[1]:.2f}'
-p1_o = f'{produto1[2]:.2f}'
-p2_p = f'{produto2[1]:.2f}'
-p2_o = f'{produto2[2]:.2f}'
-p3_p = f'{produto3[1]:.2f}'
-p3_o = f'{produto3[2]:.2f}'
-p4_p = f'{produto4[1]:.2f}'
-p4_o = f'{produto4[2]:.2f}'
+p1_p = f'{preco_produto[0]:.2f}'
+p1_o = f'{oferta_produto[0]:.2f}'
+p2_p = f'{preco_produto[1]:.2f}'
+p2_o = f'{oferta_produto[1]:.2f}'
+p3_p = f'{preco_produto[2]:.2f}'
+p3_o = f'{oferta_produto[2]:.2f}'
+p4_p = f'{preco_produto[3]:.2f}'
+p4_o = f'{oferta_produto[3]:.2f}'
 
 
 
@@ -84,14 +87,15 @@ p4_o = f'{produto4[2]:.2f}'
 
 #Estilos para os PRODUTOS
 
-#print(produto1[3][11:15])
+print(url_produto[0][11:15])
+
 
 
 # Estilos para os PRODUTOS definido para o MEUCOPO
-campanha = 'amarelo' #fds, madrugada, verde, vermelho, amarelo, azul
+campanha = 'vermelho' #fds, madrugada, verde, vermelho, amarelo, azul,preto, gamer
 
 
-if produto1[3][11:15] == 'meuc':
+if url_produto[0][11:15] == '.meu':
     if campanha == 'madrugada':
         bg_tabela = colores['sem_cor']
         bg_produto = colores['azul_madruga']  
@@ -115,22 +119,62 @@ if produto1[3][11:15] == 'meuc':
         # Decorador de Desconto
         decor_descont = '↓'
 
+    if campanha == 'preto':
+        bg_tabela = colores['cinza4']
+        bg_produto = colores['branco']  
+        bg_txt = colores['preto']
+        bordas = 'none','10px','15px' 
+        bg_preço = colores['cinza']       
+        bg_oferta = colores['preto']        
+        bg_botao = colores['preto']         
+        bt_texto_cor = colores['branco'] 
+        bg_tag_txt_desc = colores['branco']
+        bg_tag_desc = colores['preto']
+        bg_btn_whatsapp = colores['cinza']
+        # Bordas
+        border = borders['sem_borda']
+        border_btn_whatsapp = borders['branco_fino']
+        img_border = '10px','10px','10px'
+        font_size = ['18px','20px']
+        # Decorador de Desconto
+        decor_descont = '↓'
     if campanha == 'azul':
             bg_tabela = colores['sem_cor']
-            bg_produto = colores['cinza_claro']  
+            bg_produto = colores['branco']  
             bg_txt = colores['azul_esc_copo']
             bt_texto_cor = colores['preto']
             bordas = 'none','10px','15px'
             bg_txt = colores['azul_esc_copo']      
             bg_preço = colores['cinza']       
             bg_oferta = colores['azul_esc_copo']        
-            bg_botao = colores['vermelho1']         
+            bg_botao = colores['azul6']         
+            bt_texto_cor = colores['azul5'] 
+            bg_tag_txt_desc = colores['azul5']
+            bg_tag_desc = colores['azul6']
+            bg_btn_whatsapp = colores['cinza2']
+            # Bordas
+            border = borders['cinza_red']
+            border_btn_whatsapp = borders['sem_borda']
+            img_border = '10px','10px','10px'
+            font_size = ['18px','20px']
+            # Decorador de Desconto
+            decor_descont = '↓'
+    if campanha == 'gamer':
+            bg_tabela = colores['sem_cor']
+            bg_produto = colores['branco']  
+            bg_txt = colores['azul_esc_copo']
+            bt_texto_cor = colores['preto']
+            bordas = 'none','10px','15px'
+            bg_txt = colores['azul_esc_copo']      
+            bg_preço = colores['cinza']       
+            bg_oferta = colores['azul_esc_copo']        
+            bg_botao = colores['azul7']         
             bt_texto_cor = colores['branco'] 
             bg_tag_txt_desc = colores['branco']
-            bg_tag_desc = colores['azul2']
-            bg_btn_whatsapp = colores['azul2']
+            bg_tag_desc = colores['azul7']
+            bg_btn_whatsapp = colores['rosa2']
             # Bordas
-            border = borders['sem_borda']
+            border = borders['cinza_red']
             border_btn_whatsapp = borders['sem_borda']
             img_border = '10px','10px','10px'
             font_size = ['18px','20px']
@@ -172,8 +216,8 @@ if produto1[3][11:15] == 'meuc':
         bg_oferta = colores['preto']        
         bg_botao = colores['vermelho1']         
         bt_texto_cor = colores['branco'] 
-        bg_tag_txt_desc = colores['branco']
-        bg_tag_desc = colores['vermelho1']
+        bg_tag_txt_desc = colores['preto']
+        bg_tag_desc = colores['amarelo']
         bg_btn_whatsapp = colores['amarelo']
         # Bordas
         border = borders['sem_borda']
@@ -185,17 +229,17 @@ if produto1[3][11:15] == 'meuc':
 
     if campanha == 'vermelho':
         bg_tabela = colores['sem_cor']
-        bg_produto = colores['vermelho1']  
-        bg_txt = colores['branco']
+        bg_produto = colores['branco']  
+        bg_txt = colores['cinza']
         bg_botao = colores['amarelo']  
         bt_texto_cor = colores['verde_escuro']
         bordas = 'none','10px','15px'      
         bg_preço = colores['vermelho2']       
-        bg_oferta = colores['branco']        
-        bg_botao = colores['amarelo']         
-        bt_texto_cor = colores['preto'] 
-        bg_tag_txt_desc = colores['preto']
-        bg_tag_desc = colores['amarelo']
+        bg_oferta = colores['cinza']        
+        bg_botao = colores['vermelho4']         
+        bt_texto_cor = colores['branco'] 
+        bg_tag_txt_desc = colores['branco']
+        bg_tag_desc = colores['vermelho4']
         bg_btn_whatsapp = colores['cinza2']
         # Bordas
         border = borders['sem_borda']
@@ -246,7 +290,7 @@ else:
 
 # Estilos para os PRODUTOS definido para o COPO FÁCIL
 campanha_cp = 'copo' #consumidor, none, ruvolo, copo
-if produto1[3][11:15] == 'copo':
+if url_produto[0][11:15] =='.ruv':
     bg_tabela = colores['azul_esc_copo']
     bg_produto = colores['azul_esc_copo']
     bordas = 'none','10px','15px'
@@ -269,7 +313,7 @@ if produto1[3][11:15] == 'copo':
 # Estilos para os PRODUTOS definido para o RUVOLO LOJA
 campanha_rvl = 'ruvolo'
 
-if produto1[3][11:15] == '.ruv': 
+if url_produto[0][11:15] == 'a.ru': 
     bg_tabela = colores['sem_cor']
     bg_produto = colores['branco']
     bordas = 'none','10px','15px'
@@ -304,7 +348,7 @@ if desconto[3] > 35:
 
 # Estilos para Botão de Desconto
 estilos = [
-            f"background-color: red;font-size: 16px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;border:{border};border-radius: 5px;padding: 2px 8px;display: none;",
+           f"background-color: red;font-size: 16px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;border:{border};border-radius: 5px;padding: 2px 8px;display: none;",
            f"background-color: {bg_tag_desc};color:{bg_tag_txt_desc};font-size: 16px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;font-weight: bolder;border:{border};border-radius: 5px;padding: 2px 8px;",
            f"background-color: {bg_tag_desc};color:{bg_tag_txt_desc};font-weight: bolder;font-size: 16px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;border:{border};border-radius: 5px;padding: 2px 8px;",
            f"background-color: {bg_tag_desc};color:{bg_tag_txt_desc};font-size: 16px;font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;border:{border};border-radius: 5px;padding: 2px 8px;"
@@ -329,7 +373,7 @@ if desconto[3] > base_desconto:
     sp3 = estilos[1]
 
 # Estilo botão de desconto definido para o MEUCOPO
-if produto1[3][11:15] == 'meuc':
+if url_produto[0][11:15] == '.meu':
     if desconto[0] > base_desconto:
         sp0 = estilos[2]
     if desconto[1] > base_desconto:
@@ -340,7 +384,7 @@ if produto1[3][11:15] == 'meuc':
         sp3 = estilos[2]
 
 # Estilo botão de desconto definido para COPOFÁCIL
-if produto1[3][11:15] == 'copo':
+if url_produto[0][11:15] =='.ruv':
     if desconto[0] > base_desconto:
         sp0 = estilos[3]
     if desconto[1] > base_desconto:
@@ -357,7 +401,7 @@ if produto1[3][11:15] == 'copo':
 conjunto = ["","/un"]
 quantitario = conjunto[1]
 
-if produto1[3][11:15] == 'copo':
+if url_produto[0][11:15] =='.ruv':
     quantitario = conjunto[1]
 else:
     quantitario = conjunto[0]
@@ -413,7 +457,7 @@ bt_whatsapp = f'''
             <!-- BOTÃO DE COMPARTILHAR DO WHASTAPP -->    
         <tr style="text-align: center";>
             <td style="padding-top: 7px;">        
-                <a href="https://api.whatsapp.com/send?&text={produto1[3].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
+                <a href="https://api.whatsapp.com/send?&text={url_produto[0].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
                 style="background-color: {bg_btn_whatsapp};
                 border:{border_btn_whatsapp};
                 border-radius: 5px;
@@ -427,7 +471,7 @@ bt_whatsapp = f'''
             </td>
             <td></td>
             <td style="padding-top: 7px;">        
-                <a href="https://api.whatsapp.com/send?&text={produto2[3].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
+                <a href="https://api.whatsapp.com/send?&text={url_produto[1].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
                 style="background-color: {bg_btn_whatsapp};
                 border:{border_btn_whatsapp};
                 border-radius: 5px;
@@ -441,7 +485,7 @@ bt_whatsapp = f'''
             </td>
             <td></td>
             <td style="padding-top: 7px;">        
-                <a href="https://api.whatsapp.com/send?&text={produto3[3].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
+                <a href="https://api.whatsapp.com/send?&text={url_produto[2].replace("http:","https:")}" target="_blank" rel="noopener noreferrer"
                 style="background-color: {bg_btn_whatsapp};
                 border:{border_btn_whatsapp};
                 border-radius: 5px;
@@ -460,13 +504,13 @@ bt_whatsapp = f'''
 '''
 
 # modifica o texto e propriedades de cor do botão de compra de acordo com o url/site
-if produto1[3][11:15] == 'meuc':
+if url_produto[0][11:15] == '.meu':
     bt_texto = texto_botao[0]
     botao = botao_produto1
-elif produto1[3][11:15] == '.ruv':
+elif url_produto[0][11:15] == 'a.ru':
     bt_texto = texto_botao[1]
     botao = botao_produto3
-elif produto1[3][11:15] == 'copo':
+elif url_produto[0][11:15] =='.ruv':
     bt_texto = texto_botao[1]
     botao = botao_produto2
 else:
@@ -474,7 +518,7 @@ else:
     botao = botao_produto1
 
 # print("Este é o site:", end='')
-# print(produto1[3][11:15])
+# print(url_produto[0][11:15])
 
 
 
@@ -581,7 +625,7 @@ tabela2_preco_oferta = f'''
     </td>
     <!-- VALOR DE DESCONTO1 -->
     <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -590,14 +634,14 @@ tabela2_preco_oferta = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
-        " alt="" width="170" height="170" border="0px" /></a></td>
+        " alt="" width="200" height="200" border="0px" /></a></td>
         <!--PRODUTO #2 -->
     <td style="width: 209.641px; text-align: center; vertical-align: middle; height: 170px;" scope="col"><span style="color: #ffffff; font-size: 24px;"></span></td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -610,13 +654,13 @@ tabela2_preco_oferta = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
         
-        " alt="" width="170" height="170" border="0px" /></a></td>
+        " alt="" width="200" height="200" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
     <td style="
@@ -627,7 +671,7 @@ tabela2_preco_oferta = f'''
     background-color: {bg_produto}; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -641,7 +685,7 @@ tabela2_preco_oferta = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -680,7 +724,7 @@ tabela2_preco_oferta = f'''
     "><span style="font-size: 20px; 
     margin: auto;
     font-family: 'arial black', sans-serif;color:{bg_oferta}">
-        por R${produto1[2]}{quantitario}
+        por R${p1_o.replace('.',',')}{quantitario}
     </span></td>
     <td style="width: 209.641px; height: 24px;"> </td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -698,7 +742,7 @@ tabela2_preco_oferta = f'''
     </tr>
     <tr style="height: 44px;">
     <td style="
-    background-color:white; 
+    background-color:{bg_produto}; 
     border-bottom-left-radius: {bordas[1]};
     border-bottom-right-radius: {bordas[1]};
     width: 209.641px; 
@@ -706,7 +750,7 @@ tabela2_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -727,18 +771,24 @@ tabela2_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
         {bt_texto}
         </a></td>
+<tr>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+
+</tr>
 
 '''
+
 #tabela sem preços e oferta
 tabela2_sem_preco_oferta = f'''
     <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -747,11 +797,11 @@ tabela2_sem_preco_oferta = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -767,11 +817,11 @@ tabela2_sem_preco_oferta = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
         
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
@@ -784,7 +834,7 @@ tabela2_sem_preco_oferta = f'''
     background-color: {bg_produto}; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -798,7 +848,7 @@ tabela2_sem_preco_oferta = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -863,7 +913,7 @@ tabela2_sem_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -884,7 +934,7 @@ tabela2_sem_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -892,10 +942,11 @@ tabela2_sem_preco_oferta = f'''
         </a></td>
        
 '''
+
 #tabela sem preços e oferta
 tabela2_preco = f'''
 <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -904,11 +955,11 @@ tabela2_preco = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -924,11 +975,11 @@ tabela2_preco = f'''
     width: 45%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
         
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
@@ -941,7 +992,7 @@ tabela2_preco = f'''
     background-color: {bg_produto}; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -955,7 +1006,7 @@ tabela2_preco = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -1020,7 +1071,7 @@ tabela2_preco = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1041,7 +1092,7 @@ tabela2_preco = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1083,7 +1134,7 @@ tabela3_preco_oferta = f'''
     </tr>
 
     <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -1092,11 +1143,11 @@ tabela3_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1109,11 +1160,11 @@ tabela3_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1126,11 +1177,11 @@ tabela3_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto3[4]}
+        {img_produto[2]}
         
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
@@ -1146,7 +1197,7 @@ tabela3_preco_oferta = f'''
     line-height: 110%; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1161,7 +1212,7 @@ tabela3_preco_oferta = f'''
     line-height: 110%;   
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1176,7 +1227,7 @@ tabela3_preco_oferta = f'''
     line-height: 110%;   
     text-align: center; 
     height: 44px;">
-        {produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -1260,7 +1311,7 @@ tabela3_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         " target="_blank" rel="noopener" 
         style="{botao}">
@@ -1279,7 +1330,7 @@ tabela3_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         " target="_blank" rel="noopener" 
         style="{botao}">
@@ -1298,7 +1349,7 @@ tabela3_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1310,7 +1361,7 @@ tabela3_preco_oferta = f'''
 tabela3_sem_preco_oferta = f'''
 </tr>
     <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -1319,11 +1370,11 @@ tabela3_sem_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1336,11 +1387,11 @@ tabela3_sem_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1353,11 +1404,11 @@ tabela3_sem_preco_oferta = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto3[4]}
+        {img_produto[2]}
         
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
@@ -1370,7 +1421,7 @@ tabela3_sem_preco_oferta = f'''
     background-color: {bg_produto}; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1382,7 +1433,7 @@ tabela3_sem_preco_oferta = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1394,7 +1445,7 @@ tabela3_sem_preco_oferta = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -1477,7 +1528,7 @@ tabela3_sem_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1496,7 +1547,7 @@ tabela3_sem_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1515,7 +1566,7 @@ tabela3_sem_preco_oferta = f'''
     height: 24px;">
         <a href="
         
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1526,7 +1577,7 @@ tabela3_sem_preco_oferta = f'''
 #tabela sem preços e oferta
 tabela3_preco = f'''
     <!--PRODUTOS -->
-    <tr style="height: 170px;">
+    <tr style="height: 180px;">
         <!--PRODUTO #1 -->
     <td style="
     background-color: {bg_produto};
@@ -1535,11 +1586,11 @@ tabela3_preco = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto1[4]}
+        {img_produto[0]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1552,11 +1603,11 @@ tabela3_preco = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto2[4]}
+        {img_produto[1]}
 
         
         " alt="" width="170" height="170" border="0px" /></a></td>
@@ -1569,11 +1620,11 @@ tabela3_preco = f'''
     width: 32%; 
     height: 170px;"><a href="
 
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
         "
-        {produto3[4]}
+        {img_produto[2]}
         
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
@@ -1586,7 +1637,7 @@ tabela3_preco = f'''
     background-color: {bg_produto}; 
     text-align: center; 
     height: 44px;">
-        {produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1598,7 +1649,7 @@ tabela3_preco = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
@@ -1610,7 +1661,7 @@ tabela3_preco = f'''
     background-color: {bg_produto};  
     text-align: center; 
     height: 44px;">
-        {produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+        {nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
 
     </td>
     </tr>
@@ -1692,7 +1743,7 @@ tabela3_preco = f'''
     height: 24px;">
         <a href="
         
-        {produto1[3].replace("http:","https:")}
+        {url_produto[0].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1711,7 +1762,7 @@ tabela3_preco = f'''
     height: 24px;">
         <a href="
         
-        {produto2[3].replace("http:","https:")}
+        {url_produto[1].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1730,7 +1781,7 @@ tabela3_preco = f'''
     height: 24px;">
         <a href="
         
-        {produto3[3].replace("http:","https:")}
+        {url_produto[2].replace("http:","https:")}
 
         "; target="_blank" rel="noopener" 
         style="{botao}">
@@ -1742,7 +1793,7 @@ tabela3_preco = f'''
 #4 produtos
 #tabela com preços e oferta
 tabela4_preco_oferta = f'''
-    
+        
     <!-- VALOR DE DESCONTO1 -->
     <tr style="height: 30px;text-align: right;">
     <td style="
@@ -1754,6 +1805,8 @@ tabela4_preco_oferta = f'''
     </td>
     
     <td style="width: 209.641px;"> </td>
+    <td style="width: 209.641px;"> </td>
+    <td style="width: 209.641px;"> </td>
     <td style="
     color: white;
     padding-right: 4px;
@@ -1762,152 +1815,360 @@ tabela4_preco_oferta = f'''
     </span> 
     </td>
     <!-- VALOR DE DESCONTO1 -->
-    <tr style="height: 170px;"><!--PRODUTO #1 -->
-    <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
-    border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto1[3].replace('http:','https:')} 
+    <!--PRODUTOS -->
+    <tr style="height: 180px;">
+        <!--PRODUTO #1 -->
+    <td style="
+    background-color: {bg_produto};
+    border-top-right-radius: {bordas[1]};
+    border-top-left-radius: {bordas[1]};
+    width: 45%; 
+    height: 170px;"><a href="
+
+        {url_produto[0].replace("http:","https:")}
         
-        " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto1[4]}
-        " alt="" width="170" height="170" border="0px" /> </a></td>
-    <!--PRODUTO #2 -->
-    <td style="width: 209.641px; 
-    text-align: center; vertical-align: middle; height: 170px;" scope="col"> </td>
-    <!--PRODUTO #3 -->
-    <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
-    border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto2[3].replace('http:','https:')} 
+        " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
+        "
+        {img_produto[0]}
+
         
-        " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto2[4]}
-        " alt="" width="170" height="170" border="0px" /></a></td>
+        " alt="" width="200" height="200" border="0px" /></a></td>
+        <!--PRODUTO #2 -->
+    <td style="width: 209.641px; text-align: center; vertical-align: middle; height: 170px;" scope="col"><span style="color: #ffffff; font-size: 24px;"></span></td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+        <!--PRODUTO #3 -->
+    <td style="width: 209.641px; height: 170px;"><span style="color: #ffffff; font-size: 20px;"></span></td>
+    <td style="
+    background-color: {bg_produto};
+    border-top-right-radius: {bordas[1]};
+    border-top-left-radius: {bordas[1]};
+    width: 45%; 
+    height: 170px;"><a href="
+
+        {url_produto[1].replace("http:","https:")}
+        
+        " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
+        "
+        {img_produto[1]}
+        
+        " alt="" width="200" height="200" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
-    <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
-    <td style="width: 209.641px; 
-    text-align: center; height: 44px;"> </td>
-    <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    <td style="
+    
+    width: 209.641px;
+    padding: 10px;
+    color: {bg_txt};
+    background-color: {bg_produto}; 
+    text-align: center; 
+    height: 44px;">
+        {nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+
+    </td>
+    <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
+    <td style="
+    
+    width: 209.641px;
+    padding: 10px;
+    color: {bg_txt};
+    background-color: {bg_produto};  
+    text-align: center; 
+    height: 44px;">
+        {nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+
+    </td>
     </tr>
     <!-- PREÇO PROMOCIONAL  1 -->
+   
     <tr style="height: 22px;">
-    <td style="border-right: 1px solid #c2c2c2; h: 209.641px; color: {bg_preço}; font-size: {font_size[0]}; background-color: {bg_produto}; 
-    text-align: center; height: 22px;">de <s> R${p1_p.replace('.',',')} </s></td>
+    <td style="
+                width: 209.641px;
+        color: {bg_preço};
+        font-size: {font_size[0]};
+        background-color: {bg_produto};  
+        text-align: center; 
+        height: 22px;">de <s>R$
+        {p1_p.replace('.',',')}
+    </s></td>
     <td style="width: 209.641px; height: 22px;"> </td>
-    <td style="border-right: 1px solid #c2c2c2; h: 209.641px; color: {bg_preço}; font-size: {font_size[0]}; background-color: {bg_produto}; 
-    text-align: center; height: 22px;">de <s> R${p2_p.replace('.',',')}</s></td>
-    <!-- PREÇO PROMOCIONAL  2 --> 
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 22px;"> </td>
+    <td style="
+                width: 209.641px;
+        color: {bg_preço};
+        font-size: {font_size[0]};
+        background-color: {bg_produto};  
+        text-align: center; 
+        height: 22px;">de <s>R$
+        {p2_p.replace('.',',')}
+    </s></td>
+    
     </tr>
     <tr style="height: 44px;">
-    <td style="width: 209.641px; 
-    text-align: center; height: 10px; background-color: {bg_produto}; border-right: 1px solid #c2c2c2; an style="font-size: 20px; margin: auto; font-family: 'arial black', sans-serif;color:{bg_oferta}"> por R${p1_o.replace('.',',')}{quantitario} </span></td>
-    <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="width: 209.641px; 
-    text-align: center; background-color: {bg_produto}; height: 10px; border-right: 1px solid #c2c2c2; an style="font-size: 20px; margin: auto; font-family: 'arial black', sans-serif;color:{bg_oferta}">por R${p2_o.replace('.',',')}{quantitario}</span></td>
-    </tr>
-    <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: center; height: 24px;"><a style="{botao}" href="
-    
-    
-    {produto1[3].replace('http:','https:')} 
-    
-   " target="_blank" rel="noopener"> {bt_texto} </a></td>
-    <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: center; height: 24px;"><a style="{botao}" href="
-    
-    
-    {produto2[3].replace('http:','https:')} 
-    
-    " target="_blank" rel="noopener">{bt_texto}</a></td>
-    </tr>
-    <!-- VALOR DE DESCONTO 2A -->
-    <tr>
-    <td> </td>
-    </tr>
-    <tr style="height: 30px;">
-    <td style="background-color: none; border-right: none; border-left: none; border-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: right;color: white; height: 24px;"><span style="{sp2}">
-        {decor_descont}{desconto[2]}%
+    <td style="
+    width: 209.641px; 
+    text-align: center; 
+    height: 10px;
+    background-color: {bg_produto}; 
+    "><span style="font-size: 20px; 
+    margin: auto;
+    font-family: 'arial black', sans-serif;color:{bg_oferta}">
+        por R${p1_o.replace('.',',')}{quantitario}
     </span></td>
     <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: none; border-right: none; border-left: none; border-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: right;color: white; height: 24px;"><span style="{sp3}">
-        {decor_descont}{desconto[3]}%
-    </span></td>
-    <!-- VALOR DE DESCONTO 2B -->
-    </tr>
-    <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;"><a href="
-    {produto3[3].replace('http:','https:')} 
-    
-    " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto3[4]}" alt
-    ="" width="170" height="170" border="0px" /> </a></td>
-    <td style="width: 209.641px; height: 170px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;"><a href="
-    {produto4[3].replace('http:','https:')} 
-    
-    " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto4[4]}" alt
-    ="" width="170" height="170" border="0px" /></a></td>
-    </tr>
-    <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto4[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="
+    width: 209.641px; 
+    text-align: center;
+    background-color: {bg_produto};  
+    height: 10px;
+    "><span style="font-size: 20px; 
+    margin: auto;
+    font-family: 'arial black', sans-serif;color:{bg_oferta}">
+        por R${p2_o.replace('.',',')}{quantitario}
+    </span></td>
+    </tr>
+    <tr style="height: 44px;">
+    <td style="
+    background-color:{bg_produto}; 
+    border-bottom-left-radius: {bordas[1]};
+    border-bottom-right-radius: {bordas[1]};
+    width: 209.641px; 
+    text-align: center; 
+    height: 24px;">
+        <a href="
+        
+        {url_produto[0].replace("http:","https:")}
+
+        "; target="_blank" rel="noopener" 
+        style="{botao}">
+        {bt_texto}
+        </a>
+    
+    
+    </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 35px;"> </td>
+    <td style="
+    background-color: {bg_produto}; 
+    border-bottom-left-radius: {bordas[1]};
+    border-bottom-right-radius: {bordas[1]};
+    width: 209.641px; 
+    text-align: center; 
+    height: 24px;">
+        <a href="
+        
+        {url_produto[1].replace("http:","https:")}
+
+        "; target="_blank" rel="noopener" 
+        style="{botao}">
+        {bt_texto}
+        </a></td>
+<tr>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+
+</tr>
+
+<!-- LINHA 2 DE PRODUTOS -->
+
+        
+    <!-- VALOR DE DESCONTO1 -->
+    <tr style="height: 30px;text-align: right;">
+    <td style="
+    color: white;
+    padding-right: 4px; 
+    width: 32%;"><span style="{sp0}">
+        {decor_descont}{desconto[0]}%
+    </span>   
+    </td>
+    
+    <td style="width: 209.641px;"> </td>
+    <td style="width: 209.641px;"> </td>
+    <td style="width: 209.641px;"> </td>
+    <td style="
+    color: white;
+    padding-right: 4px;
+    width: 32%; "><span style="{sp1}">
+        {decor_descont}{desconto[1]}%
+    </span> 
+    </td>
+    <!-- VALOR DE DESCONTO1 -->
+    <!--PRODUTOS -->
+    <tr style="height: 180px;">
+        <!--PRODUTO #3 -->
+    <td style="
+    background-color: {bg_produto};
+    border-top-right-radius: {bordas[1]};
+    border-top-left-radius: {bordas[1]};
+    width: 45%; 
+    height: 170px;"><a href="
+
+        {url_produto[2].replace("http:","https:")}
+        
+        " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
+        "
+        {img_produto[2]}
+
+        
+        " alt="" width="200" height="200" border="0px" /></a></td>
+        <!--PRODUTO #2 -->
+    <td style="width: 209.641px; text-align: center; vertical-align: middle; height: 170px;" scope="col"><span style="color: #ffffff; font-size: 24px;"></span></td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+        <!--PRODUTO #4 -->
+    <td style="width: 209.641px; height: 170px;"><span style="color: #ffffff; font-size: 20px;"></span></td>
+    <td style="
+    background-color: {bg_produto};
+    border-top-right-radius: {bordas[1]};
+    border-top-left-radius: {bordas[1]};
+    width: 45%; 
+    height: 170px;"><a href="
+
+        {url_produto[3].replace("http:","https:")}
+        
+        " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src=
+        "
+        {img_produto[3]}
+        
+        " alt="" width="200" height="200" border="0px" /></a></td>
+    </tr>
+    <tr style="height: 44px;">
+    <td style="
+    
+    width: 209.641px;
+    padding: 10px;
+    color: {bg_txt};
+    background-color: {bg_produto}; 
+    text-align: center; 
+    height: 44px;">
+        {nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+
+    </td>
+    <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; text-align: center; height: 44px;"> </td>
+    <td style="
+    
+    width: 209.641px;
+    padding: 10px;
+    color: {bg_txt};
+    background-color: {bg_produto};  
+    text-align: center; 
+    height: 44px;">
+        {nome_produto[3].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}
+
+    </td>
     </tr>
     <!-- PREÇO PROMOCIONAL  1 -->
-    <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">de <s> R${p3_p.replace('.',',')} </s></td>
+   
+    <tr style="height: 22px;">
+    <td style="
+                width: 209.641px;
+        color: {bg_preço};
+        font-size: {font_size[0]};
+        background-color: {bg_produto};  
+        text-align: center; 
+        height: 22px;">de <s>R$
+        {p3_p.replace('.',',')}
+    </s></td>
+    <td style="width: 209.641px; height: 22px;"> </td>
     <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">de <s> R${p4_p.replace('.',',')}</s></td>
-     
+    <td style="width: 209.641px; height: 22px;"> </td>
+    <td style="
+                width: 209.641px;
+        color: {bg_preço};
+        font-size: {font_size[0]};
+        background-color: {bg_produto};  
+        text-align: center; 
+        height: 22px;">de <s>R$
+        {p4_p.replace('.',',')}
+    </s></td>
+    
     </tr>
     <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;"><span style="font-size: 20px; margin: auto; font-family: 'arial black', sans-serif;color:{bg_oferta}"> por R${p3_o.replace('.',',')}{quantitario} </span></td>
+    <td style="
+    width: 209.641px; 
+    text-align: center; 
+    height: 10px;
+    background-color: {bg_produto}; 
+    "><span style="font-size: 20px; 
+    margin: auto;
+    font-family: 'arial black', sans-serif;color:{bg_oferta}">
+        por R${p3_o.replace('.',',')}{quantitario}
+    </span></td>
     <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;"><span style="font-size: 20px; margin: auto; font-family: 'arial black', sans-serif;color:{bg_oferta}">por R${p4_o.replace('.',',')}{quantitario}</span></td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="
+    width: 209.641px; 
+    text-align: center;
+    background-color: {bg_produto};  
+    height: 10px;
+    "><span style="font-size: 20px; 
+    margin: auto;
+    font-family: 'arial black', sans-serif;color:{bg_oferta}">
+        por R${p4_o.replace('.',',')}{quantitario}
+    </span></td>
     </tr>
     <tr style="height: 44px;">
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: center; height: 24px;"><a style="{botao}" href="
+    <td style="
+    background-color:{bg_produto}; 
+    border-bottom-left-radius: {bordas[1]};
+    border-bottom-right-radius: {bordas[1]};
+    width: 209.641px; 
+    text-align: center; 
+    height: 24px;">
+        <a href="
+        
+        {url_produto[2].replace("http:","https:")}
+
+        "; target="_blank" rel="noopener" 
+        style="{botao}">
+        {bt_texto}
+        </a>
     
     
-    {produto3[3].replace('http:','https:')} 
-    
-    " target="_blank" rel="noopener">{bt_texto}</a></td>
+    </td>
     <td style="width: 209.641px; height: 24px;"> </td>
-    <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: 1px solid #c2c2c2; width: 209.641px; 
-    text-align: center; height: 24px;"><a style="{botao}" href="
-    
-    
-    {produto4[3].replace('http:','https:')}  
-    
-    " target="_blank" rel="noopener">{bt_texto}</a></td>
-    </tr>
-     
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 35px;"> </td>
+    <td style="
+    background-color: {bg_produto}; 
+    border-bottom-left-radius: {bordas[1]};
+    border-bottom-right-radius: {bordas[1]};
+    width: 209.641px; 
+    text-align: center; 
+    height: 24px;">
+        <a href="
+        
+        {url_produto[3].replace("http:","https:")}
+
+        "; target="_blank" rel="noopener" 
+        style="{botao}">
+        {bt_texto}
+        </a></td>
+<tr>
+    <td style="width: 209.641px; height: 24px;"> </td>
+    <td style="width: 209.641px; height: 24px;"> </td>
+
+</tr>
+
 '''
+
 
 tabela4_sem_preco_oferta = f'''
     
-    <tr style="height: 170px;"><!--PRODUTO #1 -->
+    <tr style="height: 180px;"><!--PRODUTO #1 -->
     <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
     border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto1[3].replace('http:','https:')} 
+        {url_produto[0].replace('http:','https:')} 
         
         " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto1[4]}
+        {img_produto[0]}
         " alt="" width="170" height="170" border="0px" /> </a></td>
     <!--PRODUTO #2 -->
     <td style="width: 209.641px; 
@@ -1915,19 +2176,19 @@ tabela4_sem_preco_oferta = f'''
     <!--PRODUTO #3 -->
     <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
     border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto2[3].replace('http:','https:')} 
+        {url_produto[1].replace('http:','https:')} 
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto2[4]}
+        {img_produto[1]}
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
     <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 44px;">{nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     <td style="width: 209.641px; 
     text-align: center; height: 44px;"> </td>
     <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 44px;">{nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     </tr>
     <!-- PREÇO PROMOCIONAL
     <tr style="height: 22px;">
@@ -1951,7 +2212,7 @@ tabela4_sem_preco_oferta = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto1[3].replace('http:','https:')} 
+    {url_produto[0].replace('http:','https:')} 
     
    " target="_blank" rel="noopener"> {bt_texto} </a></td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -1959,7 +2220,7 @@ tabela4_sem_preco_oferta = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto2[3].replace('http:','https:')} 
+    {url_produto[1].replace('http:','https:')} 
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     </tr>
@@ -1974,26 +2235,26 @@ tabela4_sem_preco_oferta = f'''
     <tr style="height: 44px;">
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
     text-align: center; height: 24px;"><a href="
-    {produto3[3].replace('http:','https:')} 
+    {url_produto[2].replace('http:','https:')} 
     
     " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto3[4]}" alt
+    {img_produto[2]}" alt
     ="" width="170" height="170" border="0px" /> </a></td>
     <td style="width: 209.641px; height: 170px;"> </td>
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
     text-align: center; height: 24px;"><a href="
-    {produto4[3].replace('http:','https:')} 
+    {nome_produto[3].replace('http:','https:')} 
     
     " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto4[4]}" alt
+    {img_produto[3]}" alt
     ="" width="170" height="170" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 24px;">{nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     <td style="width: 209.641px; height: 24px;"> </td>
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto4[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 24px;">{nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     </tr>
     <!-- PREÇO PROMOCIONAL
     <tr style="height: 44px;">
@@ -2017,7 +2278,7 @@ tabela4_sem_preco_oferta = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto3[3].replace('http:','https:')} 
+    {url_produto[2].replace('http:','https:')} 
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -2025,7 +2286,7 @@ tabela4_sem_preco_oferta = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto4[3].replace('http:','https:')}  
+    {nome_produto[3].replace('http:','https:')}  
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     </tr>
@@ -2034,13 +2295,13 @@ tabela4_sem_preco_oferta = f'''
 
 tabela4_preco = f'''
     
-    <tr style="height: 170px;"><!--PRODUTO #1 -->
+    <tr style="height: 180px;"><!--PRODUTO #1 -->
     <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
     border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto1[3].replace('http:','https:')} 
+        {url_produto[0].replace('http:','https:')} 
         
         " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto1[4]}
+        {img_produto[0]}
         " alt="" width="170" height="170" border="0px" /> </a></td>
     <!--PRODUTO #2 -->
     <td style="width: 209.641px; 
@@ -2048,19 +2309,19 @@ tabela4_preco = f'''
     <!--PRODUTO #3 -->
     <td style="background-color: {bg_produto}; border-top-right-radius: {bordas[1]};
     border-top-left-radius: {bordas[1]}; border-right: 1px solid #c2c2c2; h: 40%; height: 170px;"><a href="
-        {produto2[3].replace('http:','https:')} 
+        {url_produto[1].replace('http:','https:')} 
         
         " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-        {produto2[4]}
+        {img_produto[1]}
         " alt="" width="170" height="170" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
     <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto1[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 44px;">{nome_produto[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     <td style="width: 209.641px; 
     text-align: center; height: 44px;"> </td>
     <td style="border-right: 1px solid #c2c2c2; h: 209.641px; background-color: {bg_produto}; 
-    text-align: center; height: 44px;">{produto2[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 44px;">{nome_produto[1].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     </tr>
     <!-- PREÇO PROMOCIONAL
     <tr style="height: 22px;">
@@ -2084,7 +2345,7 @@ tabela4_preco = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto1[3].replace('http:','https:')} 
+    {url_produto[0].replace('http:','https:')} 
     
    " target="_blank" rel="noopener"> {bt_texto} </a></td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -2092,7 +2353,7 @@ tabela4_preco = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto2[3].replace('http:','https:')} 
+    {url_produto[1].replace('http:','https:')} 
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     </tr>
@@ -2107,26 +2368,26 @@ tabela4_preco = f'''
     <tr style="height: 44px;">
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
     text-align: center; height: 24px;"><a href="
-    {produto3[3].replace('http:','https:')} 
+    {url_produto[2].replace('http:','https:')} 
     
     " target="_blank" rel="noopener"> <img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto3[4]}" alt
+    {img_produto[2]}" alt
     ="" width="170" height="170" border="0px" /> </a></td>
     <td style="width: 209.641px; height: 170px;"> </td>
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
     text-align: center; height: 24px;"><a href="
-    {produto4[3].replace('http:','https:')} 
+    {nome_produto[3].replace('http:','https:')} 
     
     " target="_blank" rel="noopener"><img style="border: 0px; display: block;border-radius:{img_border[1]} ;margin-left: auto; margin-right: auto;" src="
-    {produto4[4]}" alt
+    {img_produto[3]}" alt
     ="" width="170" height="170" border="0px" /></a></td>
     </tr>
     <tr style="height: 44px;">
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto3[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 24px;">{nome_produto[2].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     <td style="width: 209.641px; height: 24px;"> </td>
     <td style="background-color: {bg_produto}; border-right: 1px solid #c2c2c2; er-bottom: none; width: 209.641px; 
-    text-align: center; height: 24px;">{produto4[0].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
+    text-align: center; height: 24px;">{nome_produto[3].replace('REF','Ref').replace('Ref.','Ref.:').replace('Ref.:','<br>Ref.:').replace('peças','Pcs').replace('Peças',' Pcs').replace('pçs','Pcs').replace('4Pcs','4 Pcs').replace('4 Pcs','<br>4 Pcs').replace('pçs','Pcs').replace('2Pcs','2 Pcs').replace('2 Pcs','<br>2 Pcs').replace('6Pcs','6 Pcs').replace('6 Pcs','<br>6 Pcs').replace('|',' ').replace('CAIXA COM','<br>CAIXA COM').title().replace('De ', 'de ').replace('Do ','do ').replace('Para ', 'para ').replace('E ', 'e ').replace('Com ', 'com ').replace('Em ', 'em ')}</td>
     </tr>
     <!-- PREÇO PROMOCIONAL
     <tr style="height: 44px;">
@@ -2149,7 +2410,7 @@ tabela4_preco = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto3[3].replace('http:','https:')} 
+    {url_produto[2].replace('http:','https:')} 
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     <td style="width: 209.641px; height: 24px;"> </td>
@@ -2157,7 +2418,7 @@ tabela4_preco = f'''
     text-align: center; height: 24px;"><a style="{botao}" href="
     
     
-    {produto4[3].replace('http:','https:')}  
+    {nome_produto[3].replace('http:','https:')}  
     
     " target="_blank" rel="noopener">{bt_texto}</a></td>
     </tr>
@@ -2171,9 +2432,9 @@ tabela4_preco = f'''
 # Para 2 Produtos
 with codecs.open('temp_base2.html','w', 'utf-8') as f:
     f.write(header_2)
-    if (produto1[1] == 0.0 and produto1[2] == 0.0): 
+    if (preco_produto[0] == 0.0 and oferta_produto[0] == 0.0): 
         f.write(tabela2_sem_preco_oferta) #sem preço e oferta 1 e 2
-    elif produto1[2] == 0.0: 
+    elif oferta_produto[0] == 0.0: 
         f.write(tabela2_preco) #não tem oferta 2
     else:
         f.write(tabela2_preco_oferta)
@@ -2183,25 +2444,23 @@ with codecs.open('temp_base2.html','w', 'utf-8') as f:
 # Para 3 Produtos
 with codecs.open('temp_base3.html','w', 'utf-8') as f:
     f.write(header)
-    if (produto1[1] == 0.0 and  produto1[2] == 0.0):#sem preço e oferta 1 e 2 ajustar para "== 0.0" default mode
+    if (preco_produto[0] == 0.0 and  oferta_produto[0] == 0.0):#sem preço e oferta 1 e 2 ajustar para "== 0.0" default mode
         f.write(tabela3_sem_preco_oferta)
-    elif produto1[2] == 0.0: #não tem oferta 2
+    elif oferta_produto[0] == 0.0: #não tem oferta 2
         f.write(tabela3_preco)
     else:
         f.write(tabela3_preco_oferta)
-    if produto1[3][11:15] == 'meuc':
+    if url_produto[0][11:15] == '.meu':
         f.write(bt_whatsapp)
     f.write(footer)
         
 # Para 4 Produtos
-'''with codecs.open('temp_base4.html','w', 'utf-8') as f:
-    f.write(header_2)
-    if (produto1[1] == 0.0 and  produto1[2] == 0.0): #sem preço e oferta 1 e 2
-        f.write(tabela4_sem_preco_oferta)
-    elif produto1[2] == 0.0: #não tem oferta 2
-        f.write(tabela4_preco)
-    else:
-        f.write(tabela4_preco_oferta)
-    f.write(footer)
-
-'''
+with codecs.open('temp_base4.html','w', 'utf-8') as f:
+ f.write(header_2)
+ if (preco_produto[0] == 0.0 and  oferta_produto[0] == 0.0): #sem preço e oferta 1 e 2
+     f.write(tabela4_sem_preco_oferta)
+ elif oferta_produto[0] == 0.0: #não tem oferta 2
+     f.write(tabela4_preco)
+ else:
+     f.write(tabela4_preco_oferta)
+ f.write(footer)
