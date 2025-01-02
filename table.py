@@ -92,7 +92,7 @@ print(url_produto[0][11:15])
 
 
 # Estilos para os PRODUTOS definido para o MEUCOPO
-campanha = 'vermelho' #fds, madrugada, verde, vermelho, amarelo, azul,preto, gamer
+campanha = 'amarelo' #fds, madrugada, verde, vermelho, amarelo, azul,preto, gamer
 
 
 if url_produto[0][11:15] == '.meu':
@@ -208,17 +208,17 @@ if url_produto[0][11:15] == '.meu':
         bg_tabela = colores['sem_cor']
         bg_produto = colores['branco']  
         bg_txt = colores['branco']
-        bg_botao = colores['amarelo']  
+        bg_botao = colores['cinza']  
         bt_texto_cor = colores['preto']
         bordas = 'none','10px','15px'
-        bg_txt = colores['preto']      
-        bg_preço = colores['amarelo']       
-        bg_oferta = colores['preto']        
-        bg_botao = colores['vermelho1']         
+        bg_txt = colores['verde_escuro']      
+        bg_preço = colores['cinza3']       
+        bg_oferta = colores['verde_escuro']        
+        bg_botao = colores['amarelo']         
         bt_texto_cor = colores['branco'] 
         bg_tag_txt_desc = colores['preto']
         bg_tag_desc = colores['amarelo']
-        bg_btn_whatsapp = colores['amarelo']
+        bg_btn_whatsapp = colores['cinza4']
         # Bordas
         border = borders['sem_borda']
         border_btn_whatsapp = borders['branco']

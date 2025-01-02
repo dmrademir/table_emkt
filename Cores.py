@@ -3,7 +3,7 @@
 colores = {'sem_cor':'none',
            'branco':'white',
            'branco_op2':'hsla(0, 0%, 100%, 0.2);',
-           'amarelo':'#ffc901',
+           'amarelo':'#d3b361',
            'azul':"#5e9ae4",
            'azul2':"#3173b9",
            'azul3':"#27b4f2",
